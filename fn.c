@@ -81,10 +81,10 @@ int is_background(char *str[], int sz)
 }
 /*SIGINT, SIGQUIT handler of shell*/
 void sig_ign_handler (int signo){
-  printf("\n");
+  printf("\nsig_ign\n");
   longjmp(&to_shell, 1);
 }
 void sig_dfl_handler(int signo){
-  printf("\n");
-  exit(0);
+  printf("\nsig_dfl\n");
+  longjmp(&to_child_kill, 1);
 }

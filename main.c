@@ -4,12 +4,12 @@ int main(int argc, char **argv)
   extern const char *prompt;
   int i = 0, vector_size, execute_bg;
   pid_t pid;
-  signal(SIGINT, sig_ign_handler);
-  signal(SIGQUIT, sig_ign_handler);
   while (1)
   {
     //if shell recive SIGINT, SIGQUIT
     __sigsetjmp(&to_shell, 1);
+    signal(SIGINT, sig_ign_handler);
+    signal(SIGQUIT, sig_ign_handler);
 
     fputs(prompt, stdout);
     fgets(cmdline, BUFSIZ, stdin);
@@ -23,8 +23,6 @@ int main(int argc, char **argv)
     switch (pid = fork())
     {
     case 0:
-      signal(SIGINT, sig_dfl_handler);
-      signal(SIGQUIT, sig_dfl_handler);
       if (execute_bg){
         pid = fork();
         if(pid == -1){
@@ -40,8 +38,12 @@ int main(int argc, char **argv)
     case -1:
       fatal("main()");
     default:
-        wait(NULL);
-    
+      signal(SIGINT, sig_dfl_handler);
+      signal(SIGQUIT, sig_dfl_handler);
+      if(__sigsetjmp(&to_child_kill, 1)){
+      kill(pid, SIGINT);
+      }
+      wait(NULL);
     }
   }
   return 0;

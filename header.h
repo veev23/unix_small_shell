@@ -15,6 +15,7 @@ static const char *prompt = "myshell> ";
 char* cmdvector[MAX_CMD_ARG];
 char  cmdline[BUFSIZE];
 struct __jmp_buf_tag to_shell;
+struct __jmp_buf_tag to_child_kill;
 
 void fatal(char *);
 int makelist(char *, const char *, char** , int);
