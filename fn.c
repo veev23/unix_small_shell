@@ -47,7 +47,8 @@ int is_no_fork(char *str[])
       getlogin_r(tmp, 40);
       strcpy(tmp2, "/home/");
       strcat(tmp2, tmp);
-      if(chdir(tmp2)==-1){
+      if (chdir(tmp2) == -1)
+      {
         perror("cd");
       }
     }
@@ -80,11 +81,13 @@ int is_background(char *str[], int sz)
   return 0;
 }
 /*SIGINT, SIGQUIT handler of shell*/
-void sig_ign_handler (int signo){
-  printf("\nsig_ign\n");
+void sig_ign_handler(int signo)
+{
+  printf("\n");
   longjmp(&to_shell, 1);
 }
-void sig_dfl_handler(int signo){
-  printf("\nsig_dfl\n");
+void sig_dfl_handler(int signo)
+{
+  printf("\n");
   longjmp(&to_child_kill, 1);
 }

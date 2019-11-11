@@ -3,6 +3,13 @@ int main(int argc, char **argv)
 {
   extern const char *prompt;
   int i = 0, vector_size, execute_bg;
+  struct sigaction chld_act;
+
+  chld_act.sa_handler = SIG_IGN;
+  sigemptyset(&(chld_act.sa_mask));
+  chld_act.sa_flags= SA_NOCLDSTOP;
+  sigaction(SIGCHLD, &chld_act, NULL);
+  
   pid_t pid;
   while (1)
   {
@@ -23,27 +30,21 @@ int main(int argc, char **argv)
     switch (pid = fork())
     {
     case 0:
-      if (execute_bg){
-        pid = fork();
-        if(pid == -1){
-          fatal("main()");
-        }
-        else if(pid>0){
-          //child of shell
-          exit(0);
-        }
-      }
       execvp(cmdvector[0], cmdvector);
-      fatal("main()");
+      fatal(cmdvector[0]);
     case -1:
-      fatal("main()");
+      fatal("fork()");
     default:
       signal(SIGINT, sig_dfl_handler);
       signal(SIGQUIT, sig_dfl_handler);
-      if(__sigsetjmp(&to_child_kill, 1)){
-      kill(pid, SIGINT);
+      //foreground process kill
+      if (__sigsetjmp(&to_child_kill, 1))
+      {
+        kill(pid, SIGINT);
       }
-      wait(NULL);
+      if(!execute_bg){
+        waitpid(pid, NULL, 0);
+      }
     }
   }
   return 0;
