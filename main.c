@@ -7,7 +7,7 @@ int main(int argc, char **argv)
 
   chld_act.sa_handler = SIG_IGN;
   sigemptyset(&(chld_act.sa_mask));
-  chld_act.sa_flags= SA_NOCLDSTOP;
+  chld_act.sa_flags= SA_NOCLDWAIT;
   sigaction(SIGCHLD, &chld_act, NULL);
   
   pid_t pid;
