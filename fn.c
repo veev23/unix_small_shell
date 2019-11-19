@@ -18,6 +18,7 @@ int find_char(const char* s, char key){
   return pos;
 }
 int is_delimiter(const char c, const char* delimiters){
+    if(c=='&') return 1;
   while(*delimiters){
     if(c == *delimiters) return 1;
     delimiters++;
@@ -37,10 +38,12 @@ int get_lexeme(char *s, const char *delimiters, char* lexeme){
     }
     else if(!is_delimiter(*s, delimiters)){
       start_flag = 1;
+      *lexeme++ = *s;
     }
     offset++;
     s++;
   }
+  *lexeme = 0;
   return offset;
 }
 int makelist(char *s, const char *delimiters, char **list, int MAX_LIST)
@@ -50,7 +53,8 @@ int makelist(char *s, const char *delimiters, char **list, int MAX_LIST)
   if(in_redirect != -1){
     char filename[256];
     int iterator = in_redirect;
-    for(;iterator<in_redirect+get_lexeme(&s[in_redirect], delimiters, filename); iterator++){
+    int maximum = in_redirect+get_lexeme(&s[in_redirect+1], delimiters, filename);
+    for(;iterator<=maximum; iterator++){
       s[iterator] = ' ';
     }
     int fd = open(filename, O_RDONLY);
@@ -62,10 +66,11 @@ int makelist(char *s, const char *delimiters, char **list, int MAX_LIST)
   if(out_redirect != -1){
     char filename[256];
     int iterator = out_redirect;
-    for(;iterator<out_redirect+get_lexeme(&s[out_redirect], delimiters, filename); iterator++){
+    int maximum = out_redirect+get_lexeme(&s[out_redirect+1], delimiters, filename);
+    for(;iterator<=maximum; iterator++){
       s[iterator] = ' ';
     }
-    int fd = open(filename, O_RDONLY);
+    int fd = open(filename, O_WRONLY | O_CREAT);
     if(fd == -1) fatal(filename);
     if(dup2(fd, STDOUT_FILENO) == -1) fatal("dup2");
     close(fd);

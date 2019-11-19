@@ -5,6 +5,8 @@ int main(int argc, char **argv)
   int i = 0, vector_size, execute_bg;
 
   //save fd STDIN, STDOUT
+  stdin_fd = 1000;
+  stdout_fd = 1001;
   if (dup2(STDIN_FILENO, stdin_fd) == -1)
     fatal("dup2 STDIN");
   if (dup2(STDOUT_FILENO, stdout_fd) == -1)
