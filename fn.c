@@ -8,6 +8,16 @@ void fatal(char *str)
   perror(str);
   exit(1);
 }
+int have_pipe(char* s, int next_cmd){
+  while(s[next_cmd]){
+    if(s[next_cmd] == '|'){
+      s[next_cmd] = 0;
+      return next_cmd+1;
+    }
+    next_cmd++;
+  }
+  return -1;
+}
 int find_char(const char* s, char key){
   int i=0;
   int pos=-1;
@@ -19,6 +29,8 @@ int find_char(const char* s, char key){
 }
 int is_delimiter(const char c, const char* delimiters){
     if(c=='&') return 1;
+    if(c=='<') return 1;
+    if(c=='>') return 1;
   while(*delimiters){
     if(c == *delimiters) return 1;
     delimiters++;
@@ -58,8 +70,13 @@ int makelist(char *s, const char *delimiters, char **list, int MAX_LIST)
       s[iterator] = ' ';
     }
     int fd = open(filename, O_RDONLY);
-    if(fd == -1) fatal(filename);
-    if(dup2(fd, STDIN_FILENO) == -1) fatal("dup2");
+    if(fd == -1) {
+      perror(filename);
+      return -1;
+    }
+    if(dup2(fd, STDIN_FILENO) == -1) {
+      fatal("dup2");
+    }
     close(fd);
   }
   int out_redirect = find_char(s, '>');
@@ -76,7 +93,7 @@ int makelist(char *s, const char *delimiters, char **list, int MAX_LIST)
     close(fd);
   }
 
-
+//parse
   int i = 0;
   int numtokens = 0;
   char *snew = NULL;

@@ -20,6 +20,9 @@ int main(int argc, char **argv)
   sigaction(SIGCHLD, &chld_act, NULL);
 
   pid_t pid;
+
+  int pipe_fd[2];
+  int next_cmd, start_cmd;
   while (1)
   {
     //if shell recive SIGINT, SIGQUIT
@@ -27,17 +30,25 @@ int main(int argc, char **argv)
     signal(SIGINT, sig_ign_handler);
     signal(SIGQUIT, sig_ign_handler);
 
+    start_cmd = 0;
     set_std_fd();
     fputs(prompt, stdout);
     fgets(cmdline, BUFSIZ, stdin);
     cmdline[strlen(cmdline) - 1] = '\0';
-
-    vector_size = makelist(cmdline, " \t", cmdvector, MAX_CMD_ARG);
+    do
+    {
+      next_cmd = have_pipe(cmdline, next_cmd);
+      vector_size = makelist(&cmdline[start_cmd], " \t", cmdvector, MAX_CMD_ARG);
+      if(vector_size == -1) continue;
+      start_cmd = next_cmd;
       execute_bg = is_background(cmdvector, vector_size);
       if (is_no_fork(cmdvector))
-      {
         continue;
+
+      if(next_cmd != -1){//if using pipe.
+        pipe(pipe_fd);
       }
+
       switch (pid = fork())
       {
       case 0:
@@ -58,7 +69,7 @@ int main(int argc, char **argv)
           waitpid(pid, NULL, 0);
         }
       }
-    
+    } while (next_cmd != -1);
   }
   return 0;
 }

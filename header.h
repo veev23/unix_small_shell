@@ -15,6 +15,7 @@
 int stdin_fd;
 int stdout_fd;
 
+
 static const char *prompt = "myshell> ";
 char* cmdvector[MAX_CMD_ARG];
 char  cmdline[BUFSIZE];
@@ -24,6 +25,8 @@ struct __jmp_buf_tag to_child_kill;
 //set stdin_fd, stdout_fd
 void set_std_fd();
 void fatal(char *);
+//reutrn : '|' next index
+int have_pipe(char* s, int next_cmd);
 int find_char(const char* s, char key);
 int is_delimiter(const char c, const char* delimiters);
 //return : lexeme last index + 1
