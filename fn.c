@@ -9,6 +9,7 @@ void fatal(char *str)
   exit(1);
 }
 int have_pipe(char* s, int next_cmd){
+  if(next_cmd == -1) return -1;
   while(s[next_cmd]){
     if(s[next_cmd] == '|'){
       s[next_cmd] = 0;
