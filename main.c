@@ -23,7 +23,7 @@ int main(int argc, char **argv)
 
   int pipe_fd[2];
   int next_cmd, start_cmd;
-  int in_pipe = 0 ;//had pipe
+  int in_pipe = 0; //had pipe
   while (1)
   {
     //if shell recive SIGINT, SIGQUIT
@@ -31,20 +31,22 @@ int main(int argc, char **argv)
     signal(SIGINT, sig_ign_handler);
     signal(SIGQUIT, sig_ign_handler);
 
-    start_cmd = 0;
     set_std_fd();
+    start_cmd = 0;
     fputs(prompt, stdout);
     fgets(cmdline, BUFSIZ, stdin);
     cmdline[strlen(cmdline) - 1] = '\0';
     next_cmd = have_pipe(cmdline, 0);
     if (next_cmd != -1)
-    {//if using pipe
-      if(pipe(pipe_fd) == -1) perror("pipe");
-      if(dup2(pipe_fd[1], STDOUT_FILENO)==-1)perror("dup2 out");
+    { //if using pipe
+      if (pipe(pipe_fd) == -1)
+        perror("pipe");
+      if (dup2(pipe_fd[1], STDOUT_FILENO) == -1)
+        perror("dup2 out");
       close(pipe_fd[1]);
-      if(dup2(pipe_fd[0], STDIN_FILENO) ==-1)perror("dup2 in");
-      close(pipe_fd[0]);
-      in_pipe=1;
+      if (dup2(pipe_fd[0], STDIN_FILENO) == -1)
+        perror("dup2 in");
+      in_pipe = 1;
     }
     do
     {
@@ -52,13 +54,14 @@ int main(int argc, char **argv)
       if (vector_size == -1)
         continue;
       start_cmd = next_cmd;
-      if(start_cmd == -1 && in_pipe){
-          in_pipe = 0;
-      }
       execute_bg = is_background(cmdvector, vector_size);
       if (is_no_fork(cmdvector))
         continue;
-
+      if (start_cmd == -1 && in_pipe && !out_redirect_flag)
+      {
+        if (dup2(stdout_fd, STDOUT_FILENO) == -1)
+          fatal("dup2 STDOUT");
+      }
       switch (pid = fork())
       {
       case 0:
@@ -77,6 +80,15 @@ int main(int argc, char **argv)
         if (!execute_bg)
         {
           waitpid(pid, NULL, 0);
+          if (in_pipe)
+          {
+            if (dup2(pipe_fd[0], STDIN_FILENO) == -1)
+              perror("dup2 in");
+          }
+        }
+        if (start_cmd == -1 && in_pipe)
+        {
+          in_pipe = 0;
         }
       }
       next_cmd = have_pipe(cmdline, next_cmd);

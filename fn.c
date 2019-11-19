@@ -82,6 +82,7 @@ int makelist(char *s, const char *delimiters, char **list, int MAX_LIST)
   }
   int out_redirect = find_char(s, '>');
   if(out_redirect != -1){
+    out_redirect_flag = 1;
     char filename[256];
     int iterator = out_redirect;
     int maximum = out_redirect+get_lexeme(&s[out_redirect+1], delimiters, filename);
@@ -92,6 +93,9 @@ int makelist(char *s, const char *delimiters, char **list, int MAX_LIST)
     if(fd == -1) fatal(filename);
     if(dup2(fd, STDOUT_FILENO) == -1) fatal("dup2");
     close(fd);
+  }
+  else{
+    out_redirect_flag = 0;
   }
 
 //parse
