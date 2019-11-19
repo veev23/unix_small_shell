@@ -70,7 +70,7 @@ int makelist(char *s, const char *delimiters, char **list, int MAX_LIST)
     for(;iterator<=maximum; iterator++){
       s[iterator] = ' ';
     }
-    int fd = open(filename, O_WRONLY | O_CREAT);
+    int fd = open(filename, O_WRONLY | O_CREAT, 0755);
     if(fd == -1) fatal(filename);
     if(dup2(fd, STDOUT_FILENO) == -1) fatal("dup2");
     close(fd);
