@@ -16,6 +16,7 @@ int stdin_fd;
 int stdout_fd;
 
 int out_redirect_flag;
+int in_redirect_flag;
 
 static const char *prompt = "myshell> ";
 char* cmdvector[MAX_CMD_ARG];
